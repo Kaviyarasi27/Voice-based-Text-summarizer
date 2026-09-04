@@ -1,124 +1,568 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline Voice Summarizer</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0d0d0d;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: #1e1e2f;
-      padding: 30px;
-      border-radius: 12px;
-      width: 700px;
-      max-width: 95%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      text-align: center;
-    }
-    h1 {
-      color: #00e0ff;
-      margin-bottom: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 180px;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 12px;
-      font-size: 1rem;
-      resize: none;
-    }
-    button {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 8px;
-      margin: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1rem;
-      transition: transform 0.2s;
-    }
-    button:hover { transform: scale(1.05); }
-    #speakBtn { background: linear-gradient(90deg, #7c5cff, #00e0ff); color: #fff; }
-    #summarizeBtn { background: linear-gradient(90deg, #00e0ff, #7c5cff); color: #fff; }
-    #output {
-      margin-top: 18px;
-      padding: 12px;
-      background: #252539;
-      border-radius: 8px;
-      min-height: 60px;
-      color: #ddd;
-      text-align: left;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        name="description"
+        content="Voice-based text summarization web application using NLP and browser speech APIs."
+    >
+    <meta
+        name="author"
+        content="Kaviyarasi"
+    >
+    <title>Voice-Based Text Summarizer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0d0d0d;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: #1e1e2f;
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Header */
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #00e0ff;
+        }
+
+        .header p {
+            color: #b8b8c8;
+            font-size: 0.98rem;
+            line-height: 1.5;
+        }
+
+        /* Controls */
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #dddddd;
+        }
+
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 8px;
+            border: 1px solid #41415a;
+            background: #252539;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: #00e0ff;
+        }
+
+        /* Input */
+
+        .input-section {
+            margin-top: 10px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .section-title h2 {
+            font-size: 1.05rem;
+        }
+
+        .counter {
+            color: #9999aa;
+            font-size: 0.85rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 210px;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #41415a;
+            background: #12121d;
+            color: #ffffff;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: #77778a;
+        }
+
+        textarea:focus {
+            border-color: #00e0ff;
+            box-shadow: 0 0 0 2px rgba(0, 224, 255, 0.12);
+        }
+
+        /* Buttons */
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        button {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:focus-visible {
+            outline: 2px solid #ffffff;
+            outline-offset: 2px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #speakBtn {
+            background: #dc3545;
+            color: #ffffff;
+        }
+
+        #summarizeBtn {
+            background: linear-gradient(
+                90deg,
+                #00e0ff,
+                #7c5cff
+            );
+            color: #ffffff;
+        }
+
+        #readBtn {
+            background: #33334d;
+            color: #ffffff;
+        }
+
+        #clearBtn {
+            background: #55556d;
+            color: #ffffff;
+        }
+
+        /* Status */
+
+        .status {
+            margin-top: 14px;
+            min-height: 22px;
+            color: #a9a9b8;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .status.listening {
+            color: #ff6b6b;
+        }
+
+        .status.success {
+            color: #63e6be;
+        }
+
+        .status.error {
+            color: #ff8787;
+        }
+
+        /* Output */
+
+        .output-section {
+            margin-top: 26px;
+        }
+
+        .output-box {
+            background: #252539;
+            border: 1px solid #393952;
+            border-radius: 10px;
+            padding: 18px;
+            min-height: 120px;
+            color: #dddddd;
+            line-height: 1.7;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output-placeholder {
+            color: #77778a;
+        }
+
+        /* Statistics */
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .stat-card {
+            background: #181827;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 1.1rem;
+            color: #00e0ff;
+            margin-bottom: 4px;
+        }
+
+        .stat-card span {
+            font-size: 0.8rem;
+            color: #9999aa;
+        }
+
+        /* Footer */
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: #77778a;
+        }
+
+        /* Responsive */
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 22px;
+                margin-top: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.55rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .statistics {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            textarea {
+                min-height: 180px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>🎤 Offline Voice Summarizer</h1>
-    <textarea id="input" placeholder="Type or speak your text here..."></textarea>
-    <br>
-    <button id="speakBtn">🎙 Start Speaking</button>
-    <button id="summarizeBtn">📝 Summarize</button>
-    <div id="output">⚡ Your summary will appear here...</div>
-  </div>
 
-  <script>
-    // ---------------------------
-    // Extractive Summarizer Logic
-    // ---------------------------
-    function extractiveSummarize(text, maxSentences = 3) {
-      const sentences = text.split(/[.!?]\s/).filter(s => s.length > 20);
-      if (sentences.length <= maxSentences) return text;
-      // Simple ranking by sentence length
-      const ranked = sentences.sort((a, b) => b.length - a.length);
-      return ranked.slice(0, maxSentences).join(". ") + ".";
-    }
+    <main class="container">
 
-    // Handle Summarize button
-    document.getElementById("summarizeBtn").addEventListener("click", () => {
-      const input = document.getElementById("input").value.trim();
-      if (!input) {
-        document.getElementById("output").textContent = "⚠️ Please enter some text.";
-        return;
-      }
-      const summary = extractiveSummarize(input, 3);
-      document.getElementById("output").textContent = "✅ Summary: " + summary;
-    });
+        <!-- Header -->
 
-    // ---------------------------
-    // Voice Input (Speech API)
-    // ---------------------------
-    const speakBtn = document.getElementById("speakBtn");
-    let recognition;
+        <header class="header">
+            <h1>🎤 Voice-Based Text Summarizer</h1>
 
-    if ("webkitSpeechRecognition" in window) {
-      recognition = new webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
+            <p>
+                Summarize text using voice or keyboard input with
+                browser-based speech interaction and NLP.
+            </p>
+        </header>
 
-      recognition.onstart = () => { speakBtn.textContent = "🎙 Listening..."; };
-      recognition.onend = () => { speakBtn.textContent = "🎤 Start Speaking"; };
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById("input").value += " " + transcript;
-      };
 
-      speakBtn.addEventListener("click", () => recognition.start());
-    } else {
-      speakBtn.disabled = true;
-      speakBtn.textContent = "❌ Voice not supported";
-    }
-  </script>
+        <!-- Controls -->
+
+        <section class="controls" aria-label="Summarizer settings">
+
+            <div class="control-group">
+                <label for="language">
+                    Language
+                </label>
+
+                <select id="language">
+                    <option value="en-US" selected>
+                        English
+                    </option>
+
+                    <option value="ta-IN">
+                        Tamil
+                    </option>
+
+                    <option value="hi-IN">
+                        Hindi
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="control-group">
+                <label for="summaryLength">
+                    Summary Length
+                </label>
+
+                <select id="summaryLength">
+                    <option value="2">
+                        Short
+                    </option>
+
+                    <option value="3" selected>
+                        Medium
+                    </option>
+
+                    <option value="5">
+                        Long
+                    </option>
+                </select>
+            </div>
+
+        </section>
+
+
+        <!-- Input -->
+
+        <section class="input-section">
+
+            <div class="section-title">
+
+                <h2>
+                    📝 Input Text
+                </h2>
+
+                <span
+                    id="inputCounter"
+                    class="counter"
+                    aria-live="polite"
+                >
+                    0 words
+                </span>
+
+            </div>
+
+
+            <textarea
+                id="input"
+                placeholder="Type your text here or use the microphone to speak..."
+                aria-label="Text to summarize"
+            ></textarea>
+
+
+            <!-- Buttons -->
+
+            <div class="button-group">
+
+                <button
+                    id="speakBtn"
+                    type="button"
+                    aria-label="Start voice input"
+                >
+                    🎙 Start Speaking
+                </button>
+
+
+                <button
+                    id="summarizeBtn"
+                    type="button"
+                    aria-label="Summarize input text"
+                >
+                    📝 Summarize
+                </button>
+
+
+                <button
+                    id="clearBtn"
+                    type="button"
+                    aria-label="Clear input and summary"
+                >
+                    🗑 Clear
+                </button>
+
+            </div>
+
+
+            <!-- Voice / Processing Status -->
+
+            <div
+                id="status"
+                class="status"
+                role="status"
+                aria-live="polite"
+            >
+                Ready to summarize.
+            </div>
+
+        </section>
+
+
+        <!-- Output -->
+
+        <section
+            class="output-section"
+            aria-labelledby="summaryTitle"
+        >
+
+            <div class="section-title">
+
+                <h2 id="summaryTitle">
+                    📄 Generated Summary
+                </h2>
+
+            </div>
+
+
+            <div
+                id="output"
+                class="output-box"
+                aria-live="polite"
+            >
+                <span class="output-placeholder">
+                    Your summary will appear here...
+                </span>
+            </div>
+
+
+            <!-- Summary Actions -->
+
+            <div class="button-group">
+
+                <button
+                    id="readBtn"
+                    type="button"
+                    aria-label="Read summary aloud"
+                    disabled
+                >
+                    🔊 Read Summary
+                </button>
+
+            </div>
+
+
+            <!-- Statistics -->
+
+            <div class="statistics">
+
+                <div class="stat-card">
+                    <strong id="originalWords">
+                        0
+                    </strong>
+
+                    <span>
+                        Original Words
+                    </span>
+                </div>
+
+
+                <div class="stat-card">
+                    <strong id="summaryWords">
+                        0
+                    </strong>
+
+                    <span>
+                        Summary Words
+                    </span>
+                </div>
+
+
+                <div class="stat-card">
+                    <strong id="reduction">
+                        0%
+                    </strong>
+
+                    <span>
+                        Reduction
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Footer -->
+
+        <footer class="footer">
+            Speech recognition availability depends on the browser,
+            operating system and microphone permissions.
+        </footer>
+
+    </main>
+
+
+    <!-- JavaScript -->
+
+    <script src="script.js"></script>
+
 </body>
 </html>
